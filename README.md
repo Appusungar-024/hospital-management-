@@ -4,7 +4,7 @@ A modern, full-stack Hospital Information Management System (HIMS) designed to s
 
 ---
 
-##  Key Modules & Features
+## 🚀 Key Modules & Features
 
 ### 1. Smart Triage & Live Queue Management
 *   **Prioritized Sorting:** Patient queues are sorted dynamically by clinical priority (`triage_level` DESC, `created_at` ASC) parsed automatically from patient complaints (Red / Yellow / Green), moving critical cases to the front.
@@ -32,7 +32,7 @@ A modern, full-stack Hospital Information Management System (HIMS) designed to s
 
 ---
 
-##  Tech Stack
+## 🛠️ Tech Stack
 
 *   **Frontend:** React, Vite, Tailwind CSS (v4), TanStack Query, Lucide Icons, Axios.
 *   **Backend:** FastAPI (Python), SQLAlchemy, Alembic (Database Migrations), Pydantic.
@@ -43,7 +43,7 @@ A modern, full-stack Hospital Information Management System (HIMS) designed to s
 
 ---
 
-##  Project Structure
+## 📁 Project Structure
 
 ```text
 ├── backend/                  # FastAPI Backend Application
@@ -68,7 +68,7 @@ A modern, full-stack Hospital Information Management System (HIMS) designed to s
 
 ---
 
-## Setup & Installation
+## 💻 Setup & Installation
 
 ### Prerequisites
 *   Docker & Docker Compose
