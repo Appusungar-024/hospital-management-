@@ -6,6 +6,7 @@ from app.models.patient import Patient
 from app.models.billing import Billing
 from app.models.expense import Expense
 from app.models.visit import Visit, TriageLevel
+from app.models.lab import LabOrder, LabOrderStatusEnum
 from datetime import datetime, timedelta
 from sqlalchemy import case
 
@@ -48,8 +49,39 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
             "patient_id": v.patient_id,
             "patient_name": v.patient.name if v.patient else "Unknown",
             "triage_level": v.triage_level,
-            "waiting_since": v.created_at.strftime("%H:%M")
+            "waiting_since": v.created_at.strftime("%H:%M"),
+            "visit_id": v.id
         })
+        
+    # Generate Kanban board data for ALL visits today
+    all_visits_today = db.query(Visit).filter(func.date(Visit.created_at) == today).order_by(triage_sort.desc(), Visit.created_at.asc()).all()
+    kanban = {
+        "waiting": [],
+        "consultation": [],
+        "lab": [],
+        "pharmacy": []
+    }
+    
+    for v in all_visits_today:
+        item = {
+            "patient_id": v.patient_id,
+            "patient_name": v.patient.name if v.patient else "Unknown",
+            "triage_level": v.triage_level,
+            "waiting_since": v.created_at.strftime("%H:%M"),
+            "visit_id": v.id
+        }
+        if v.doctor_id is None:
+            kanban["waiting"].append(item)
+        elif v.medicines:
+            # Doctor prescribed medicines, now needs dispensing/billing
+            kanban["pharmacy"].append(item)
+        else:
+            # Check if there are pending lab orders
+            has_pending_lab = any(lo.status != LabOrderStatusEnum.COMPLETED for lo in v.lab_orders)
+            if has_pending_lab:
+                kanban["lab"].append(item)
+            else:
+                kanban["consultation"].append(item)
     
     # Patient Inflow Trend (Last 7 days)
     seven_days_ago = today - timedelta(days=7)
@@ -73,7 +105,8 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
             "registered_today": patients_registered_today,
             "seen": patients_seen_today,
             "waiting": patients_waiting,
-            "list": queue_list
+            "list": queue_list,
+            "kanban": kanban
         },
         "trend": trend
     }

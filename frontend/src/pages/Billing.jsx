@@ -1,9 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Receipt, DollarSign, Download, Search, ShieldCheck } from 'lucide-react';
+import toast from 'react-hot-toast';
+import confetti from 'canvas-confetti';
 import api from '../api/client';
 
 export default function Billing() {
+  const location = useLocation();
   const queryClient = useQueryClient();
   const role = localStorage.getItem('role');
   
@@ -14,7 +18,15 @@ export default function Billing() {
   
   const [activeTab, setActiveTab] = useState(canBill ? 'billing' : 'expenses');
 
-  const [patientIdStr, setPatientIdStr] = useState('');
+  const [patientIdStr, setPatientIdStr] = useState(location.state?.patientId || '');
+  
+  useEffect(() => {
+    if (location.state?.patientId) {
+      setPatientIdStr(location.state.patientId);
+      setActiveTab('billing');
+    }
+  }, [location.state]);
+
   const [formData, setFormData] = useState({ 
     amount: '', 
     payment_mode: 'Cash',
@@ -39,7 +51,8 @@ export default function Billing() {
       return res.data;
     },
     onSuccess: async (data) => {
-      alert(`Bill Created Successfully! Receipt ID: ${data.receipt_id}`);
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      toast.success(`Bill Created Successfully! Receipt ID: ${data.receipt_id}`);
 
       // Auto trigger download
       try {
@@ -53,6 +66,7 @@ export default function Billing() {
         link.parentNode.removeChild(link);
       } catch (err) {
         console.error("Error downloading PDF", err);
+        toast.error("Failed to download PDF receipt.");
       }
 
       setPatientIdStr('');
@@ -67,7 +81,7 @@ export default function Billing() {
 
   const handleBillingSubmit = (e) => {
     e.preventDefault();
-    if (!patientIdStr) return alert('Enter Patient ID');
+    if (!patientIdStr) return toast.error('Please enter a Patient ID');
     billingMutation.mutate({
       patient_id: parseInt(patientIdStr),
       amount: parseFloat(formData.amount),
@@ -85,6 +99,7 @@ export default function Billing() {
       await api.post('/billing/expenses', data);
     },
     onSuccess: () => {
+      toast.success('Expense logged successfully!');
       setExpenseData({ description: '', amount: '' });
       queryClient.invalidateQueries(['expenses']);
       queryClient.invalidateQueries(['dashboard-stats']);
@@ -113,7 +128,8 @@ export default function Billing() {
       await api.put(`/billing/claims/${id}?status=${status}${approved_amount ? `&approved_amount=${approved_amount}` : ''}`),
     onSuccess: () => {
       queryClient.invalidateQueries(['claims']);
-      alert('Claim status updated successfully!');
+      toast.success('Claim status updated successfully!');
+      confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
     }
   });
 
@@ -121,16 +137,17 @@ export default function Billing() {
     <div className="space-y-6">
       <div className="mb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Billing & Finance</h1>
-          <p className="text-slate-500 mt-1">Manage patient fees, expenses, and insurance</p>
+          <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--th-text-primary)' }}>Billing & Finance</h1>
+          <p className="mt-1" style={{ color: 'var(--th-text-muted)' }}>Manage patient fees, expenses, and insurance</p>
         </div>
       </div>
 
-      <div className="flex gap-4 border-b border-slate-200 mb-6">
+      <div className="flex gap-4 mb-6" style={{ borderBottom: '1px solid var(--th-border)' }}>
         {canBill && (
           <button 
             onClick={() => setActiveTab('billing')}
-            className={`py-3 px-6 font-medium text-sm border-b-2 transition-colors ${activeTab === 'billing' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            className="py-3 px-6 font-medium text-sm transition-colors"
+            style={{ borderBottom: activeTab === 'billing' ? '2px solid var(--th-text-accent)' : '2px solid transparent', color: activeTab === 'billing' ? 'var(--th-text-accent)' : 'var(--th-text-muted)' }}
           >
             Patient Billing
           </button>
@@ -138,7 +155,8 @@ export default function Billing() {
         {canManageClaims && (
           <button 
             onClick={() => setActiveTab('claims')}
-            className={`py-3 px-6 font-medium text-sm border-b-2 transition-colors ${activeTab === 'claims' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            className="py-3 px-6 font-medium text-sm transition-colors"
+            style={{ borderBottom: activeTab === 'claims' ? '2px solid var(--th-text-accent)' : '2px solid transparent', color: activeTab === 'claims' ? 'var(--th-text-accent)' : 'var(--th-text-muted)' }}
           >
             Insurance Claims
           </button>
@@ -146,7 +164,8 @@ export default function Billing() {
         {canViewExpenses && (
           <button 
             onClick={() => setActiveTab('expenses')}
-            className={`py-3 px-6 font-medium text-sm border-b-2 transition-colors ${activeTab === 'expenses' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+            className="py-3 px-6 font-medium text-sm transition-colors"
+            style={{ borderBottom: activeTab === 'expenses' ? '2px solid var(--th-text-accent)' : '2px solid transparent', color: activeTab === 'expenses' ? 'var(--th-text-accent)' : 'var(--th-text-muted)' }}
           >
             Expense Tracking
           </button>
@@ -156,43 +175,43 @@ export default function Billing() {
       {activeTab === 'billing' && canBill && (
         <div className="max-w-3xl glass-panel p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-emerald-100 text-emerald-600 rounded-xl">
-              <Receipt className="w-6 h-6" />
+            <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(16,185,129,0.1)' }}>
+              <Receipt className="w-6 h-6" style={{ color: '#10b981' }} />
             </div>
-            <h3 className="text-lg font-bold text-slate-800">Generate Patient Bill</h3>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--th-text-primary)' }}>Generate Patient Bill</h3>
           </div>
 
           <form onSubmit={handleBillingSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Patient Database ID</label>
+              <label className="block text-sm font-medium mb-1" style={{ color: 'var(--th-text-secondary)' }}>Patient Database ID</label>
               <div className="relative">
-                <Search className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <Search className="absolute left-3 top-3 w-5 h-5" style={{ color: 'var(--th-text-muted)' }} />
                 <input
                   type="number" required placeholder="e.g. 1"
                   value={patientIdStr} onChange={(e) => setPatientIdStr(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className="th-input w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Consultation Fee / Base Amount ($)</label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 w-5 h-5 text-slate-400" />
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--th-text-secondary)' }}>Consultation Fee / Base Amount ($)</label>
+              <div className="relative">
+                  <DollarSign className="absolute left-3 top-3 w-5 h-5" style={{ color: 'var(--th-text-muted)' }} />
                   <input
                     type="number" required step="0.01" min="0" placeholder="50.00"
                     value={formData.amount} onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                    className="th-input w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                   />
                 </div>
-                <p className="text-xs text-slate-500 mt-1">Pharmacy costs are added automatically.</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--th-text-muted)' }}>Pharmacy costs are added automatically.</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Payment Mode (for Patient Co-Pay)</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--th-text-secondary)' }}>Payment Mode (for Patient Co-Pay)</label>
                 <select
                   value={formData.payment_mode} onChange={(e) => setFormData({ ...formData, payment_mode: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500"
+                  className="th-input w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                 >
                   <option value="Cash">Cash</option>
                   <option value="UPI">UPI</option>
@@ -201,10 +220,10 @@ export default function Billing() {
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-200 mt-4">
+            <div className="pt-4 mt-4" style={{ borderTop: '1px solid var(--th-border)' }}>
               <label className="flex items-center gap-2 cursor-pointer mb-4">
-                <input type="checkbox" checked={formData.apply_insurance} onChange={e => setFormData({...formData, apply_insurance: e.target.checked})} className="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500" />
-                <span className="text-sm font-medium text-slate-700">Apply Insurance / TPA (Split Billing)</span>
+                <input type="checkbox" checked={formData.apply_insurance} onChange={e => setFormData({...formData, apply_insurance: e.target.checked})} className="w-4 h-4 rounded" />
+                <span className="text-sm font-medium" style={{ color: 'var(--th-text-secondary)' }}>Apply Insurance / TPA (Split Billing)</span>
               </label>
               
               {formData.apply_insurance && (
@@ -227,7 +246,8 @@ export default function Billing() {
 
             <button
               type="submit" disabled={billingMutation.isPending}
-              className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
+              className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm font-semibold text-white transition-all hover:opacity-90"
+              style={{ background: `linear-gradient(135deg, var(--th-brand-gradient-from), var(--th-brand-gradient-to))` }}
             >
               {billingMutation.isPending ? 'Processing...' : <><Download className="w-5 h-5" /> Generate Bill & Download Receipt</>}
             </button>
@@ -238,21 +258,21 @@ export default function Billing() {
       {activeTab === 'claims' && canManageClaims && (
         <div className="glass-panel p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-blue-100 text-blue-600 rounded-xl">
-              <ShieldCheck className="w-6 h-6" />
+            <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(59,130,246,0.1)' }}>
+              <ShieldCheck className="w-6 h-6" style={{ color: '#3b82f6' }} />
             </div>
-            <h3 className="text-lg font-bold text-slate-800">Insurance Claims Management</h3>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--th-text-primary)' }}>Insurance Claims Management</h3>
           </div>
           
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="py-3 px-4 text-sm font-semibold text-slate-600">Patient</th>
-                  <th className="py-3 px-4 text-sm font-semibold text-slate-600">Provider & Policy</th>
-                  <th className="py-3 px-4 text-sm font-semibold text-slate-600 text-right">Claim Amount</th>
-                  <th className="py-3 px-4 text-sm font-semibold text-slate-600">Status</th>
-                  <th className="py-3 px-4 text-sm font-semibold text-slate-600">Action</th>
+                <tr style={{ borderBottom: '1px solid var(--th-border)' }}>
+                  <th className="py-3 px-4 text-sm font-semibold" style={{ color: 'var(--th-text-secondary)' }}>Patient</th>
+                  <th className="py-3 px-4 text-sm font-semibold" style={{ color: 'var(--th-text-secondary)' }}>Provider & Policy</th>
+                  <th className="py-3 px-4 text-sm font-semibold text-right" style={{ color: 'var(--th-text-secondary)' }}>Claim Amount</th>
+                  <th className="py-3 px-4 text-sm font-semibold" style={{ color: 'var(--th-text-secondary)' }}>Status</th>
+                  <th className="py-3 px-4 text-sm font-semibold" style={{ color: 'var(--th-text-secondary)' }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -312,10 +332,10 @@ export default function Billing() {
       {activeTab === 'expenses' && canViewExpenses && (
         <div className="max-w-3xl glass-panel p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-3 bg-rose-100 text-rose-600 rounded-xl">
-              <DollarSign className="w-6 h-6" />
+            <div className="p-3 rounded-xl" style={{ backgroundColor: 'rgba(239,68,68,0.1)' }}>
+              <DollarSign className="w-6 h-6" style={{ color: '#ef4444' }} />
             </div>
-            <h3 className="text-lg font-bold text-slate-800">Hospital Expense Log</h3>
+            <h3 className="text-lg font-bold" style={{ color: 'var(--th-text-primary)' }}>Hospital Expense Log</h3>
           </div>
 
           <form onSubmit={handleExpenseSubmit} className="space-y-4 mb-8">

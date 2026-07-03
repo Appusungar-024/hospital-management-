@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { ThemeProvider } from './context/ThemeContext';
 import DashboardLayout from './layouts/DashboardLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
@@ -13,23 +15,29 @@ function App() {
   const isAuthenticated = !!localStorage.getItem('token');
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        
-        {/* Protected Routes */}
-        <Route path="/" element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" />}>
-          <Route index element={<Navigate to="/dashboard" />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="patients" element={<Patients />} />
-          <Route path="patients/new" element={<PatientRegistration />} />
-          <Route path="visit/:patientId" element={<DoctorVisit />} />
-          <Route path="billing" element={<Billing />} />
-          <Route path="pharmacy" element={<Pharmacy />} />
-          <Route path="lab" element={<Lab />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          
+          {/* Protected Routes */}
+          <Route path="/" element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" />}>
+            <Route index element={<Navigate to="/dashboard" />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="patients" element={<Patients />} />
+            <Route path="patients/new" element={<PatientRegistration />} />
+            <Route path="visit/:patientId" element={<DoctorVisit />} />
+            <Route path="billing" element={<Billing />} />
+            <Route path="pharmacy" element={<Pharmacy />} />
+            <Route path="lab" element={<Lab />} />
+          </Route>
+        </Routes>
+        <Toaster position="top-right" toastOptions={{ 
+          style: { background: 'var(--th-bg-sidebar)', color: 'var(--th-text-primary)', border: '1px solid var(--th-border)' },
+          success: { iconTheme: { primary: '#10b981', secondary: 'white' } },
+        }} />
+      </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

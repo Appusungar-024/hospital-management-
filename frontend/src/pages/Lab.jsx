@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { FlaskConical, CheckCircle, Upload, Search, FileText } from 'lucide-react';
+import { FlaskConical, CheckCircle, Upload } from 'lucide-react';
 import api from '../api/client';
 
 export default function Lab() {
@@ -20,9 +20,7 @@ export default function Lab() {
   const uploadResultMutation = useMutation({
     mutationFn: async (formData) => {
       await api.post(`/lab/orders/${selectedOrder.id}/result`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
     },
     onSuccess: () => {
@@ -52,42 +50,42 @@ export default function Lab() {
 
   return (
     <div className="space-y-6">
-      <div className="mb-6 flex justify-between items-end">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Diagnostics Laboratory</h1>
-          <p className="text-slate-500 mt-1">Process test orders and upload diagnostic results.</p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--th-text-primary)' }}>Diagnostics Laboratory</h1>
+        <p className="mt-1" style={{ color: 'var(--th-text-muted)' }}>Process test orders and upload diagnostic results.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="glass-panel p-6">
-          <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-2">
-            <FlaskConical className="w-5 h-5 text-indigo-600"/> Test Orders Queue
+          <h3 className="text-lg font-bold mb-6 flex items-center gap-2" style={{ color: 'var(--th-text-primary)' }}>
+            <FlaskConical className="w-5 h-5" style={{ color: 'var(--th-text-accent)' }}/> Test Orders Queue
           </h3>
           
           <div className="space-y-4">
-            {isLoading && <p>Loading orders...</p>}
-            {orders?.length === 0 && <p className="text-slate-500 italic">No lab orders in queue.</p>}
+            {isLoading && <p style={{ color: 'var(--th-text-muted)' }}>Loading orders...</p>}
+            {orders?.length === 0 && <p className="italic" style={{ color: 'var(--th-text-muted)' }}>No lab orders in queue.</p>}
             
             {orders?.map((order) => (
               <div 
                 key={order.id} 
                 onClick={() => setSelectedOrder(order)}
-                className={`p-4 border-2 rounded-xl cursor-pointer transition-all ${
-                  selectedOrder?.id === order.id ? 'border-indigo-500 shadow-md bg-indigo-50/50' : 'border-slate-100 hover:border-indigo-200 bg-white'
-                }`}
+                className="p-4 rounded-xl cursor-pointer transition-all"
+                style={{
+                  backgroundColor: selectedOrder?.id === order.id ? 'var(--th-bg-nav-active)' : 'var(--th-bg-card)',
+                  border: `2px solid ${selectedOrder?.id === order.id ? 'var(--th-text-accent)' : 'var(--th-border)'}`
+                }}
               >
                 <div className="flex justify-between items-start mb-2">
-                  <span className="font-bold text-slate-800">{order.test_type}</span>
+                  <span className="font-bold" style={{ color: 'var(--th-text-primary)' }}>{order.test_type}</span>
                   <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
-                    order.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    order.status === 'Completed' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
                   }`}>
                     {order.status}
                   </span>
                 </div>
-                <div className="text-sm text-slate-600">
+                <div className="text-sm" style={{ color: 'var(--th-text-secondary)' }}>
                   <p>Visit ID: #{order.visit_id}</p>
-                  <p className="text-xs text-slate-400 mt-1">Ordered on: {new Date(order.created_at).toLocaleString()}</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--th-text-muted)' }}>Ordered on: {new Date(order.created_at).toLocaleString()}</p>
                 </div>
               </div>
             ))}
@@ -96,37 +94,37 @@ export default function Lab() {
 
         {selectedOrder && (
           <div className="glass-panel p-6 h-fit sticky top-6">
-            <h3 className="text-lg font-bold text-indigo-900 mb-4 flex items-center gap-2">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--th-text-accent)' }}>
               <CheckCircle className="w-5 h-5"/> Process Order #{selectedOrder.id}
             </h3>
-            <div className="mb-6 p-4 bg-indigo-50 rounded-xl">
-              <p className="font-semibold text-indigo-900">{selectedOrder.test_type}</p>
-              <p className="text-sm text-indigo-700">Visit ID: #{selectedOrder.visit_id}</p>
+            <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: 'var(--th-bg-nav-active)' }}>
+              <p className="font-semibold" style={{ color: 'var(--th-text-accent)' }}>{selectedOrder.test_type}</p>
+              <p className="text-sm" style={{ color: 'var(--th-text-secondary)' }}>Visit ID: #{selectedOrder.visit_id}</p>
             </div>
 
             <form onSubmit={handleUpload} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Numeric / Text Results</label>
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--th-text-secondary)' }}>Numeric / Text Results</label>
                 <textarea 
                   value={resultData} onChange={e => setResultData(e.target.value)}
                   placeholder="e.g. Hemoglobin: 13.5 g/dL"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 min-h-[100px]"
+                  className="th-input w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none min-h-[100px]"
                 ></textarea>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Upload Report (PDF/Image)</label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:bg-slate-50 transition-colors">
+                <label className="block text-sm font-medium mb-1" style={{ color: 'var(--th-text-secondary)' }}>Upload Report (PDF/Image)</label>
+                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 rounded-xl transition-colors" style={{ border: '2px dashed var(--th-border-input)', backgroundColor: 'var(--th-bg-input)' }}>
                   <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-slate-400" />
-                    <div className="flex text-sm text-slate-600 justify-center">
-                      <label className="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none">
+                    <Upload className="mx-auto h-12 w-12" style={{ color: 'var(--th-text-muted)' }} />
+                    <div className="flex text-sm justify-center" style={{ color: 'var(--th-text-secondary)' }}>
+                      <label className="relative cursor-pointer rounded-md font-medium" style={{ color: 'var(--th-text-accent)' }}>
                         <span>Upload a file</span>
                         <input type="file" className="sr-only" onChange={(e) => setFile(e.target.files[0])} />
                       </label>
                     </div>
-                    {file && <p className="text-xs text-emerald-600 font-medium mt-2">{file.name}</p>}
-                    {!file && <p className="text-xs text-slate-500">PNG, JPG, PDF up to 10MB</p>}
+                    {file && <p className="text-xs text-emerald-500 font-medium mt-2">{file.name}</p>}
+                    {!file && <p className="text-xs" style={{ color: 'var(--th-text-muted)' }}>PNG, JPG, PDF up to 10MB</p>}
                   </div>
                 </div>
               </div>
@@ -134,7 +132,8 @@ export default function Lab() {
               <div className="pt-4">
                 <button 
                   type="submit" disabled={uploadResultMutation.isPending}
-                  className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
+                  className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-xl shadow-sm font-bold text-white transition-all hover:opacity-90"
+                  style={{ background: `linear-gradient(135deg, var(--th-brand-gradient-from), var(--th-brand-gradient-to))` }}
                 >
                   {uploadResultMutation.isPending ? 'Uploading...' : 'Submit Final Results'}
                 </button>

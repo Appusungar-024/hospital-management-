@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary-50: #eef2ff;
-  --color-primary-100: #e0e7ff;
-  --color-primary-500: #6366f1;
-  --color-primary-600: #4f46e5;
-  --color-primary-700: #4338ca;
-  --color-primary-900: #312e81;
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-900: #1e3a5f;
 
   --color-surface-50: #f8fafc;
   --color-surface-100: #f1f5f9;
@@ -14,31 +14,133 @@
   --color-surface-900: #0f172a;
 }
 
+/* ============================================================
+   CLINICAL CLEAN THEME (Default - Light Mode)
+   High-contrast, flat, Apple Health / Epic EHR style
+   ============================================================ */
+
+.clinical {
+  --th-bg: #f8fafc;
+  --th-bg-card: #ffffff;
+  --th-bg-card-hover: #f8fafc;
+  --th-bg-sidebar: #ffffff;
+  --th-bg-input: #f8fafc;
+  --th-bg-nav-active: #eff6ff;
+
+  --th-border: #e2e8f0;
+  --th-border-card: #f1f5f9;
+  --th-border-input: #cbd5e1;
+
+  --th-text-primary: #0f172a;
+  --th-text-secondary: #475569;
+  --th-text-muted: #94a3b8;
+  --th-text-accent: #1d4ed8;
+  --th-text-nav: #334155;
+  --th-text-nav-active: #1d4ed8;
+
+  --th-brand-gradient-from: #1d4ed8;
+  --th-brand-gradient-to: #2563eb;
+
+  --th-scrollbar: #cbd5e1;
+  --th-scrollbar-hover: #94a3b8;
+}
+
+/* ============================================================
+   NIGHT SHIFT THEME (Dark Mode)
+   Deep navy/slate, muted pastel accents, zero eye strain
+   ============================================================ */
+
+.nightshift {
+  --th-bg: #0f172a;
+  --th-bg-card: #1e293b;
+  --th-bg-card-hover: #334155;
+  --th-bg-sidebar: #1e293b;
+  --th-bg-input: #334155;
+  --th-bg-nav-active: rgba(59, 130, 246, 0.15);
+
+  --th-border: #334155;
+  --th-border-card: #475569;
+  --th-border-input: #475569;
+
+  --th-text-primary: #f1f5f9;
+  --th-text-secondary: #94a3b8;
+  --th-text-muted: #64748b;
+  --th-text-accent: #60a5fa;
+  --th-text-nav: #94a3b8;
+  --th-text-nav-active: #60a5fa;
+
+  --th-brand-gradient-from: #3b82f6;
+  --th-brand-gradient-to: #6366f1;
+
+  --th-scrollbar: #475569;
+  --th-scrollbar-hover: #64748b;
+}
+
 @layer base {
   body {
-    @apply bg-surface-50 text-slate-900 antialiased;
+    background-color: var(--th-bg);
+    color: var(--th-text-primary);
+    @apply antialiased transition-colors duration-300;
   }
 }
 
+/* ============================================================
+   UTILITY CLASSES (shared across both themes via CSS vars)
+   ============================================================ */
+
+/* Card / Panel — replaces old .glass-panel */
 .glass-panel {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-xl rounded-2xl;
+  background-color: var(--th-bg-card);
+  border: 1px solid var(--th-border);
+  @apply shadow-sm rounded-2xl transition-colors duration-300;
 }
 
 .card-hover {
-  @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl;
+  @apply transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg;
 }
 
-/* Custom scrollbar */
+/* ============================================================
+   TEXT HELPERS
+   ============================================================ */
+.th-text {
+  color: var(--th-text-primary);
+}
+.th-text-secondary {
+  color: var(--th-text-secondary);
+}
+.th-text-muted {
+  color: var(--th-text-muted);
+}
+.th-text-accent {
+  color: var(--th-text-accent);
+}
+
+/* ============================================================
+   INPUT HELPERS
+   ============================================================ */
+.th-input {
+  background-color: var(--th-bg-input);
+  border-color: var(--th-border-input);
+  color: var(--th-text-primary);
+}
+.th-input::placeholder {
+  color: var(--th-text-muted);
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 rounded-full;
+  background-color: var(--th-scrollbar);
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400;
+  background-color: var(--th-scrollbar-hover);
 }

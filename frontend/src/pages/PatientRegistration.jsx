@@ -5,9 +5,9 @@ import api from '../api/client';
 
 const InputWrapper = ({ icon: Icon, label, children }) => (
   <div>
-    <label className="block text-sm font-medium text-slate-700 mb-2">{label}</label>
+    <label className="block text-sm font-medium mb-2" style={{ color: 'var(--th-text-secondary)' }}>{label}</label>
     <div className="relative">
-      <div className="absolute left-3 top-3 text-slate-400">
+      <div className="absolute left-3 top-3" style={{ color: 'var(--th-text-muted)' }}>
         <Icon className="w-5 h-5" />
       </div>
       {children}
@@ -45,8 +45,8 @@ export default function PatientRegistration() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Register New Patient</h1>
-        <p className="text-slate-500 mt-1">Enter patient demographic and health information.</p>
+        <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--th-text-primary)' }}>Register New Patient</h1>
+        <p className="mt-1" style={{ color: 'var(--th-text-muted)' }}>Enter patient demographic and health information.</p>
       </div>
 
       <div className="glass-panel p-8">
@@ -56,7 +56,7 @@ export default function PatientRegistration() {
               <input 
                 type="text" required
                 value={formData.name} onChange={(e)=>setFormData({...formData, name: e.target.value})}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="th-input w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="John Doe"
               />
             </InputWrapper>
@@ -65,7 +65,7 @@ export default function PatientRegistration() {
               <input 
                 type="tel" required
                 value={formData.mobile} onChange={(e)=>setFormData({...formData, mobile: e.target.value})}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="th-input w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="+1 234 567 890"
               />
             </InputWrapper>
@@ -74,16 +74,16 @@ export default function PatientRegistration() {
               <input 
                 type="number" required min="0" max="150"
                 value={formData.age} onChange={(e)=>setFormData({...formData, age: e.target.value})}
-                className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="th-input w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="35"
               />
             </InputWrapper>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Gender</label>
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--th-text-secondary)' }}>Gender</label>
               <select 
                 value={formData.gender} onChange={(e)=>setFormData({...formData, gender: e.target.value})}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="th-input w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -95,7 +95,7 @@ export default function PatientRegistration() {
           <InputWrapper icon={Activity} label="Existing Problems (Encrypted in DB)">
             <textarea 
               value={formData.existing_problems} onChange={(e)=>setFormData({...formData, existing_problems: e.target.value})}
-              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[120px]"
+              className="th-input w-full pl-10 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[120px]"
               placeholder="Diabetes, Hypertension, etc."
             ></textarea>
           </InputWrapper>
@@ -103,7 +103,8 @@ export default function PatientRegistration() {
           <div className="pt-4 flex justify-end">
             <button 
               type="submit" disabled={loading}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-8 py-3 rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 text-white px-8 py-3 rounded-xl font-medium transition-all shadow-sm hover:opacity-90"
+              style={{ background: `linear-gradient(135deg, var(--th-brand-gradient-from), var(--th-brand-gradient-to))` }}
             >
               <Save className="w-5 h-5" />
               {loading ? 'Registering...' : 'Register Patient'}
