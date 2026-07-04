@@ -58,7 +58,7 @@ class VisitCreate(BaseModel):
 class VisitResponse(BaseModel):
     id: int
     patient_id: int
-    doctor_id: int
+    doctor_id: Optional[int] = None
     bp: Optional[str]
     weight: Optional[str]
     pulse: Optional[str]

@@ -17,7 +17,17 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 1 day
 # In production, this should be an environment variable.
 # For development, we generate one if not provided, but it needs to be persistent across restarts.
 # Let's use a hardcoded one for this DevSecOps exercise.
-ENCRYPTION_KEY = os.environ.get("ENCRYPTION_KEY", b'lUq1p-_t7q5M7Z_4K9H-9r_3_zU-yW-_9Tz1J_1c9_c=')
+# ENCRYPTION_KEY must be a valid 32-byte url-safe base64 key.
+# os.environ.get() always returns str; Fernet requires bytes.
+# WARNING: In production, set ENCRYPTION_KEY env var and NEVER change it —
+# changing the key makes all previously encrypted patient data unreadable.
+_encryption_key_raw = os.environ.get(
+    "ENCRYPTION_KEY",
+    "_cjZVdvYzl-Q8feQKiEsGOaJrLqLGZPuCYmEHgylNQc="  # Valid dev-only fallback
+)
+ENCRYPTION_KEY: bytes = (
+    _encryption_key_raw.encode() if isinstance(_encryption_key_raw, str) else _encryption_key_raw
+)
 fernet = Fernet(ENCRYPTION_KEY)
 
 def verify_password(plain_password, hashed_password):
@@ -31,7 +41,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+        # Use the configured expiry (default: 24 hours), not the library default of 15 min
+        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

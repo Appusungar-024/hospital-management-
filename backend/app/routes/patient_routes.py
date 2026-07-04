@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.patient import Patient
 from app.models.visit import Visit, TriageLevel
+from app.models.user import User, RoleEnum
 from app.schemas.schemas import PatientCreate, PatientResponse
 from app.utils.security import encrypt_data, decrypt_data
+from app.routes.auth_routes import get_current_user
 import uuid
 
 router = APIRouter(prefix="/patients", tags=["patients"])
@@ -13,7 +15,13 @@ def generate_uhid():
     return f"UHID-{uuid.uuid4().hex[:8].upper()}"
 
 @router.post("/", response_model=PatientResponse)
-def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
+def create_patient(
+    patient: PatientCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in [RoleEnum.RECEPTIONIST, RoleEnum.ADMIN]:
+        raise HTTPException(status_code=403, detail="Only receptionists and admins can register patients")
     encrypted_problems = encrypt_data(patient.existing_problems) if patient.existing_problems else None
     
     new_patient = Patient(

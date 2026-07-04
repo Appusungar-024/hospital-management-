@@ -27,18 +27,31 @@ export default function Login() {
       localStorage.setItem('role', res.data.role);
       localStorage.setItem('username', res.data.username);
       
-      navigate('/dashboard');
-      window.location.reload();
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      setError('Invalid credentials');
+      setError('Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDemoLogin = (role) => {
-    setUsername(role);
-    setPassword('password');
+  const handleDemoLogin = async (role) => {
+    setError('');
+    setLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.append('username', role);
+      params.append('password', 'password');
+      const res = await api.post('/auth/token', params);
+      localStorage.setItem('token', res.data.access_token);
+      localStorage.setItem('role', res.data.role);
+      localStorage.setItem('username', res.data.username);
+      navigate('/dashboard', { replace: true });
+    } catch (err) {
+      setError('Demo login failed. Is the backend running?');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

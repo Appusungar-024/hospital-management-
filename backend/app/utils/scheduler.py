@@ -40,9 +40,7 @@ def check_follow_up_reminders():
 
 def start_scheduler():
     scheduler = BackgroundScheduler()
-    # Run every minute for testing purposes, but in reality this would be daily at e.g., 08:00 AM
-    # scheduler.add_job(check_follow_up_reminders, 'cron', hour=8, minute=0)
-    scheduler.add_job(check_follow_up_reminders, 'interval', minutes=1)
-    
+    # Run daily at 08:00 AM to send follow-up reminders
+    scheduler.add_job(check_follow_up_reminders, 'cron', hour=8, minute=0)
     scheduler.start()
-    logger.info("APScheduler Background Tasks Started!")
+    logger.info("APScheduler Background Tasks Started (daily at 08:00)!")

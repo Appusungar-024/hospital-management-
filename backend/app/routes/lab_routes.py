@@ -66,7 +66,13 @@ async def upload_lab_result(
         try:
             attachment_url = upload_file_to_s3(file_bytes, file.filename)
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")
+            # Log the S3 failure but don't crash the entire request.
+            # The text result_data (if provided) will still be saved.
+            import logging
+            logging.getLogger(__name__).warning(
+                f"File upload to S3 failed for order {order_id}: {e}. "
+                "Result will be saved without attachment."
+            )
             
     # Update order status
     order.status = LabOrderStatusEnum.COMPLETED

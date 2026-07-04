@@ -11,8 +11,12 @@ import Billing from './pages/Billing';
 import Pharmacy from './pages/Pharmacy';
 import Lab from './pages/Lab';
 
-function App() {
+function ProtectedRoute({ children }) {
   const isAuthenticated = !!localStorage.getItem('token');
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+}
+
+function App() {
 
   return (
     <ThemeProvider>
@@ -21,8 +25,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           
           {/* Protected Routes */}
-          <Route path="/" element={isAuthenticated ? <DashboardLayout /> : <Navigate to="/login" />}>
-            <Route index element={<Navigate to="/dashboard" />} />
+          <Route path="/" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+            <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="patients" element={<Patients />} />
             <Route path="patients/new" element={<PatientRegistration />} />
@@ -31,6 +35,8 @@ function App() {
             <Route path="pharmacy" element={<Pharmacy />} />
             <Route path="lab" element={<Lab />} />
           </Route>
+          {/* Catch-all redirect */}
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
         <Toaster position="top-right" toastOptions={{ 
           style: { background: 'var(--th-bg-sidebar)', color: 'var(--th-text-primary)', border: '1px solid var(--th-border)' },

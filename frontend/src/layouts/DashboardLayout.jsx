@@ -12,16 +12,15 @@ export default function DashboardLayout() {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login');
-    window.location.reload();
+    navigate('/login', { replace: true });
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'receptionist', 'doctor', 'pharmacist', 'lab_technician'] },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'receptionist', 'doctor', 'pharmacist', 'lab_tech'] },
     { name: 'Patients', path: '/patients', icon: Users, roles: ['admin', 'receptionist', 'doctor'] },
     { name: 'Register Patient', path: '/patients/new', icon: UserPlus, roles: ['receptionist', 'admin'] },
     { name: 'Pharmacy', path: '/pharmacy', icon: Pill, roles: ['admin', 'pharmacist'] },
-    { name: 'Lab Diagnostics', path: '/lab', icon: FlaskConical, roles: ['admin', 'lab_technician', 'doctor'] },
+    { name: 'Lab Diagnostics', path: '/lab', icon: FlaskConical, roles: ['admin', 'lab_tech', 'doctor'] },
     { name: 'Billing & Expenses', path: '/billing', icon: Receipt, roles: ['receptionist', 'admin'] },
   ];
 

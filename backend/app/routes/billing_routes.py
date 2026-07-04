@@ -6,16 +6,25 @@ from app.models.billing import Billing, InsuranceClaim, ClaimStatusEnum
 from app.models.patient import Patient
 from app.models.expense import Expense
 from app.models.visit import Visit
+from app.models.user import User, RoleEnum
 from app.schemas.schemas import BillingCreate, BillingResponse, ExpenseCreate, ExpenseResponse
 from app.utils.pdf_generator import create_receipt_pdf
 from app.utils.notifications import send_sms_background
+from app.routes.auth_routes import get_current_user
 import uuid
 import datetime
 
 router = APIRouter(prefix="/billing", tags=["billing"])
 
 @router.post("/billing", response_model=BillingResponse)
-def create_billing(billing: BillingCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def create_billing(
+    billing: BillingCreate,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in [RoleEnum.RECEPTIONIST, RoleEnum.ADMIN]:
+        raise HTTPException(status_code=403, detail="Only receptionists and admins can create bills")
     patient = db.query(Patient).filter(Patient.id == billing.patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -139,15 +148,32 @@ def get_claims(db: Session = Depends(get_db)):
     return res
 
 @router.put("/claims/{claim_id}")
-def update_claim(claim_id: int, status: str, approved_amount: float = None, db: Session = Depends(get_db)):
+def update_claim(
+    claim_id: int,
+    status: str,
+    approved_amount: float = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role not in [RoleEnum.RECEPTIONIST, RoleEnum.ADMIN]:
+        raise HTTPException(status_code=403, detail="Not authorized to update claims")
+
     claim = db.query(InsuranceClaim).filter(InsuranceClaim.id == claim_id).first()
     if not claim:
         raise HTTPException(status_code=404, detail="Claim not found")
-        
-    claim.claim_status = status
+
+    # Validate status is a known ClaimStatusEnum value
+    valid_statuses = {e.value for e in ClaimStatusEnum}
+    if status not in valid_statuses:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid status '{status}'. Must be one of: {', '.join(valid_statuses)}"
+        )
+
+    claim.claim_status = ClaimStatusEnum(status)
     if approved_amount is not None:
         claim.approved_amount = approved_amount
-        
+
     db.commit()
     db.refresh(claim)
     return {"message": "Claim updated successfully"}

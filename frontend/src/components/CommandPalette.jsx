@@ -41,9 +41,20 @@ export default function CommandPalette() {
     enabled: isOpen && query.length > 0 && !query.toLowerCase().startsWith('bill '),
   });
 
+  const role = localStorage.getItem('role');
+
   const handleSelect = (path, state = null) => {
     setIsOpen(false);
     navigate(path, { state });
+  };
+
+  const handlePatientSelect = (patient) => {
+    setIsOpen(false);
+    if (role === 'doctor') {
+      navigate(`/visit/${patient.id}`);
+    } else {
+      navigate('/patients');
+    }
   };
 
   if (!isOpen) return null;
@@ -130,7 +141,7 @@ export default function CommandPalette() {
               {searchResults.map((patient) => (
                 <button
                   key={patient.id}
-                  onClick={() => handleSelect(`/patients/${patient.id}`)}
+                  onClick={() => handlePatientSelect(patient)}
                   className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-left transition-colors"
                   style={{ color: 'var(--th-text-primary)' }}
                   onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'var(--th-bg-nav-active)'}

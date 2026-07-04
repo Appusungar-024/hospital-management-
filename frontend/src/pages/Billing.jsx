@@ -16,7 +16,11 @@ export default function Billing() {
   const canViewExpenses = role === 'admin';
   const canManageClaims = role === 'receptionist' || role === 'admin';
   
-  const [activeTab, setActiveTab] = useState(canBill ? 'billing' : 'expenses');
+  const [activeTab, setActiveTab] = useState(() => {
+    if (canBill) return 'billing';
+    if (canManageClaims) return 'claims';
+    return 'expenses';
+  });
 
   const [patientIdStr, setPatientIdStr] = useState(location.state?.patientId || '');
   
@@ -74,8 +78,8 @@ export default function Billing() {
         amount: '', payment_mode: 'Cash', apply_insurance: false, 
         provider_name: '', policy_number: '', insurance_payable: '' 
       });
-      queryClient.invalidateQueries(['dashboard-stats']);
-      queryClient.invalidateQueries(['claims']);
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
     }
   });
 
@@ -101,8 +105,8 @@ export default function Billing() {
     onSuccess: () => {
       toast.success('Expense logged successfully!');
       setExpenseData({ description: '', amount: '' });
-      queryClient.invalidateQueries(['expenses']);
-      queryClient.invalidateQueries(['dashboard-stats']);
+      queryClient.invalidateQueries({ queryKey: ['expenses'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     }
   });
 
@@ -127,7 +131,7 @@ export default function Billing() {
     mutationFn: async ({ id, status, approved_amount }) => 
       await api.put(`/billing/claims/${id}?status=${status}${approved_amount ? `&approved_amount=${approved_amount}` : ''}`),
     onSuccess: () => {
-      queryClient.invalidateQueries(['claims']);
+      queryClient.invalidateQueries({ queryKey: ['claims'] });
       toast.success('Claim status updated successfully!');
       confetti({ particleCount: 50, spread: 60, origin: { y: 0.8 } });
     }

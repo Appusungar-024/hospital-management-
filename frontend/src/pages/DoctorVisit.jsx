@@ -45,7 +45,7 @@ export default function DoctorVisit() {
   const createLabOrder = async () => {
     const test_type = prompt("Enter Test Name (e.g., Complete Blood Count, Chest X-Ray):");
     if (test_type) {
-      try { await api.post('/lab/orders', { patient_id: parseInt(patientId), test_type }); queryClient.invalidateQueries(['labOrders', patientId]); alert("Lab Order sent!"); }
+      try { await api.post('/lab/orders', { patient_id: parseInt(patientId), test_type }); queryClient.invalidateQueries({ queryKey: ['labOrders', patientId] }); alert("Lab Order sent!"); }
       catch { alert("Error creating Lab Order."); }
     }
   };

@@ -27,7 +27,7 @@ export default function Lab() {
       setSelectedOrder(null);
       setResultData('');
       setFile(null);
-      queryClient.invalidateQueries(['allLabOrders']);
+      queryClient.invalidateQueries({ queryKey: ['allLabOrders'] });
       alert('Lab results uploaded successfully!');
     }
   });

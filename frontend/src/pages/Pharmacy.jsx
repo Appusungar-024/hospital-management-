@@ -22,7 +22,7 @@ export default function Pharmacy() {
     mutationFn: async (data) => await api.post('/pharmacy/inventory', data),
     onSuccess: () => {
       setInvData({ medicine_name: '', stock_quantity: '', unit_price: '' });
-      queryClient.invalidateQueries(['inventory']);
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
       alert('Inventory Updated Successfully');
     }
   });
@@ -53,8 +53,8 @@ export default function Pharmacy() {
     onSuccess: () => {
       setSelectedVisit(null);
       setDispenseItems([{ inventory_id: '', quantity: 1 }]);
-      queryClient.invalidateQueries(['pending_prescriptions']);
-      queryClient.invalidateQueries(['inventory']);
+      queryClient.invalidateQueries({ queryKey: ['pending_prescriptions'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
       alert('Medicines Dispensed. Cost added to patient billing.');
     },
     onError: (err) => {

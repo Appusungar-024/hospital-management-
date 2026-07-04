@@ -1,5 +1,5 @@
 fastapi
-uvicorn
+uvicorn[standard]
 sqlalchemy
 psycopg2-binary
 alembic
@@ -13,5 +13,5 @@ httpx
 boto3
 apscheduler
 twilio
-
-
+cryptography
+python-dotenv
